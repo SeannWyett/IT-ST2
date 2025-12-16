@@ -1,4 +1,4 @@
-import React, { createContext, useState } from 'react';
+import React, { createContext, useState, useContext } from 'react';
 
 /**
  * @typedef {import('../type/index.jsx').Task} Task
@@ -14,30 +14,10 @@ const TaskContext = createContext(undefined);
  */
 const TaskProvider = ({ children }) => {
   const [tasks, setTasks] = useState([
-    {
-      id: '1',
-      title: 'Complete project proposal',
-      description: 'Write and submit the Q1 project proposal',
-      status: 'in-progress',
-      category: 'work',
-      createdAt: new Date()
-    },
-    {
-      id: '2',
-      title: 'Buy groceries',
-      description: 'Milk, eggs, bread, vegetables',
-      status: 'todo',
-      category: 'shopping',
-      createdAt: new Date()
-    },
-    {
-      id: '3',
-      title: 'Gym workout',
-      description: 'Complete upper body routine',
-      status: 'done',
-      category: 'health',
-      createdAt: new Date()
-    }
+    // ... (Your existing task data) ...
+    { id: '1', title: 'Complete project proposal', description: 'Write and submit the Q1 project proposal', status: 'in-progress', category: 'work', createdAt: new Date() },
+    { id: '2', title: 'Buy groceries', description: 'Milk, eggs, bread, vegetables', status: 'todo', category: 'shopping', createdAt: new Date() },
+    { id: '3', title: 'Gym workout', description: 'Complete upper body routine', status: 'done', category: 'health', createdAt: new Date() }
   ]);
 
   /**
@@ -75,6 +55,20 @@ const TaskProvider = ({ children }) => {
 };
 
 TaskProvider.displayName = 'TaskProvider';
+
+// --------------------------------------------------------
+// 👇 NEW CUSTOM HOOK FOR CONSUMING THE CONTEXT
+// --------------------------------------------------------
+export const useTaskContext = () => {
+  const context = useContext(TaskContext);
+  
+  if (context === undefined) {
+    throw new Error('useTaskContext must be used within a TaskProvider');
+  }
+  
+  return context;
+};
+// --------------------------------------------------------
 
 export default TaskProvider;
 export { TaskContext };

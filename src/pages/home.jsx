@@ -1,13 +1,13 @@
 import React from 'react';
 import { useTaskContext } from '../context/useTaskContext';
-import { useRouter } from '../context/useRouter';
+import { useNavigate } from 'react-router-dom';
 import StatsGrid from '../components/sections/StatsGrid';
 import RecentTasksSection from '../components/sections/RecentTasksSection';
 import QuickActionsSection from '../components/sections/QuickActionsSection';
 
 const HomePage = () => {
-  const { tasks } = useTaskContext();
-  const { navigate } = useRouter();
+  const { tasks, deleteTask } = useTaskContext();
+  const navigate = useNavigate();
 
   const stats = {
     total: tasks.length,
@@ -18,20 +18,40 @@ const HomePage = () => {
 
   const recentTasks = tasks.slice(0, 3);
 
-  const handleViewAllTasks = () => navigate('tasks');
+  const handleViewAllTasks = () => navigate('/tasks');
+  const handleAddTask = () => navigate('/add-task');
+  const handleEditTask = (taskId) => navigate(`/edit-task/${taskId}`);
+  const handleDeleteTask = (id) => {
+    if (window.confirm('Are you sure you want to delete this task?')) {
+      deleteTask(id);
+    }
+  };
 
   return (
-      <div className="max-w-7xl mx-auto">
+    <div className="h-full bg-gray-50 dark:bg-gray-900 p-6">
         <div className="mb-8">
-          <h1 className="text-4xl font-bold text-gray-900 mb-2">Welcome to TaskFlow</h1>
-          <p className="text-gray-600">Manage your tasks efficiently and boost productivity</p>
+          <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-2">
+            Welcome to TaskFlow
+          </h1>
+          <p className="text-gray-600 dark:text-gray-300">
+            Manage your tasks efficiently and boost productivity
+          </p>
         </div>
 
         <StatsGrid stats={stats} />
-        <RecentTasksSection tasks={recentTasks} onViewAll={handleViewAllTasks} />
-        <QuickActionsSection onCreateTask={handleViewAllTasks} onViewAllTasks={handleViewAllTasks} />
-      </div>
 
+        <RecentTasksSection
+          tasks={recentTasks}
+          onViewAll={handleViewAllTasks}
+          onEdit={handleEditTask}
+          onDelete={handleDeleteTask}
+        />
+
+        <QuickActionsSection
+          onCreateTask={handleAddTask}
+          onViewAllTasks={handleViewAllTasks}
+        />
+    </div>
   );
 };
 

@@ -1,12 +1,13 @@
 import React from 'react';
 import { useTaskContext } from '../context/useTaskContext';
-import { useRouter } from '../context/useRouter';
+import { useNavigate } from 'react-router-dom';
 import TaskCard from '../components/cards/taskcard';
 import Button from '../components/ui/button';
+import { Plus, CheckCircle, Clock, AlertCircle } from 'lucide-react';
 
 const TasksPage = () => {
-  const { tasks } = useTaskContext();
-  const { navigate } = useRouter();
+  const { tasks, deleteTask } = useTaskContext();
+  const navigate = useNavigate();
 
   const tasksByStatus = {
     todo: tasks.filter(t => t.status === 'todo'),
@@ -14,58 +15,139 @@ const TasksPage = () => {
     done: tasks.filter(t => t.status === 'done')
   };
 
+  const handleEditTask = (taskId) => navigate(`/edit-task/${taskId}`);
+  const handleDeleteTask = (id) => {
+    if (window.confirm('Are you sure you want to delete this task?')) {
+      deleteTask(id);
+    }
+  };
+
+  const statusConfig = {
+    todo: {
+      title: 'To Do',
+      icon: <AlertCircle size={20} />,
+      color: 'text-yellow-600',
+      bgColor: 'bg-yellow-50',
+      borderColor: 'border-yellow-200'
+    },
+    'in-progress': {
+      title: 'In Progress',
+      icon: <Clock size={20} />,
+      color: 'text-blue-600',
+      bgColor: 'bg-blue-50',
+      borderColor: 'border-blue-200'
+    },
+    done: {
+      title: 'Done',
+      icon: <CheckCircle size={20} />,
+      color: 'text-green-600',
+      bgColor: 'bg-green-50',
+      borderColor: 'border-green-200'
+    }
+  };
+
   return (
-    <div className="max-w-7xl mx-auto p-6">
-      <div className="mb-8 flex justify-between items-center">
-        <div>
-          <h1 className="text-4xl font-bold text-gray-900 mb-2">Tasks</h1>
-          <p className="text-gray-600">Manage all your tasks here</p>
-        </div>
-        <div>
-          <Button onClick={() => navigate('home')} variant="primary">Back to Home</Button>
-        </div>
-      </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div className="bg-white rounded-lg shadow p-4">
-          <h2 className="text-lg font-semibold text-gray-900 mb-4 pb-2 border-b">To Do ({tasksByStatus.todo.length})</h2>
-          <div className="space-y-3">
-            {tasksByStatus.todo.length === 0 ? (
-              <p className="text-gray-500 text-sm text-center py-4">No tasks</p>
-            ) : (
-              tasksByStatus.todo.map(task => (
-                <TaskCard key={task.id} task={task} onEdit={() => {}} />
-              ))
-            )}
+    <div className="h-full bg-gray-50 dark:bg-gray-900 p-6">
+        {/* Header Section */}
+        <div className="mb-8">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
+            <div className="mb-4 sm:mb-0">
+              <h1 className="text-3xl sm:text-4xl font-bold text-gray-900 dark:text-white mb-2">All Tasks</h1>
+              <p className="text-gray-600 dark:text-gray-300 text-lg">Manage and track your tasks efficiently</p>
+            </div>
+            <div className="flex gap-3">
+              <Button onClick={() => navigate('/add-task')} variant="primary" icon={<Plus size={18} />}>
+                Add New Task
+              </Button>
+              <Button onClick={() => navigate('/')} variant="outline">
+                Back to Home
+              </Button>
+            </div>
           </div>
         </div>
 
-        <div className="bg-white rounded-lg shadow p-4">
-          <h2 className="text-lg font-semibold text-gray-900 mb-4 pb-2 border-b">In Progress ({tasksByStatus['in-progress'].length})</h2>
-          <div className="space-y-3">
-            {tasksByStatus['in-progress'].length === 0 ? (
-              <p className="text-gray-500 text-sm text-center py-4">No tasks</p>
-            ) : (
-              tasksByStatus['in-progress'].map(task => (
-                <TaskCard key={task.id} task={task} onEdit={() => {}} />
-              ))
-            )}
-          </div>
+        {/* Stats Overview */}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-8">
+          {Object.entries(tasksByStatus).map(([status, taskList]) => {
+            const config = statusConfig[status];
+            return (
+              <div key={status} className={`rounded-xl p-6 ${config.bgColor} border ${config.borderColor}`}>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className={`text-sm font-medium ${config.color} mb-1`}>{config.title}</p>
+                    <p className="text-2xl font-bold text-gray-900">{taskList.length}</p>
+                  </div>
+                  <div className={`${config.color}`}>
+                    {config.icon}
+                  </div>
+                </div>
+              </div>
+            );
+          })}
         </div>
 
-        <div className="bg-white rounded-lg shadow p-4">
-          <h2 className="text-lg font-semibold text-gray-900 mb-4 pb-2 border-b">Done ({tasksByStatus.done.length})</h2>
-          <div className="space-y-3">
-            {tasksByStatus.done.length === 0 ? (
-              <p className="text-gray-500 text-sm text-center py-4">No tasks</p>
-            ) : (
-              tasksByStatus.done.map(task => (
-                <TaskCard key={task.id} task={task} onEdit={() => {}} />
-              ))
-            )}
-          </div>
+        {/* Tasks Grid */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          {Object.entries(tasksByStatus).map(([status, taskList]) => {
+            const config = statusConfig[status];
+            return (
+              <div key={status} className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+                <div className={`px-6 py-4 border-b ${config.borderColor} ${config.bgColor}`}>
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <div className={`${config.color}`}>
+                        {config.icon}
+                      </div>
+                      <h2 className="text-lg font-semibold text-gray-900">{config.title}</h2>
+                    </div>
+                    <span className="text-sm font-medium text-gray-500 bg-white px-2 py-1 rounded-full">
+                      {taskList.length}
+                    </span>
+                  </div>
+                </div>
+
+                <div className="p-6">
+                  {taskList.length === 0 ? (
+                    <div className="text-center py-12">
+                      <div className={`mx-auto w-12 h-12 ${config.bgColor} rounded-full flex items-center justify-center mb-4`}>
+                        <div className={`${config.color}`}>
+                          {config.icon}
+                        </div>
+                      </div>
+                      <p className="text-gray-500 text-sm">No tasks in {config.title.toLowerCase()}</p>
+                      <p className="text-gray-400 text-xs mt-1">Tasks will appear here when added</p>
+                    </div>
+                  ) : (
+                    <div className="space-y-4">
+                      {taskList.map(task => (
+                        <TaskCard
+                          key={task.id}
+                          task={task}
+                          onEdit={() => handleEditTask(task.id)}
+                          onDelete={handleDeleteTask}
+                        />
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
+            );
+          })}
         </div>
-      </div>
+
+        {/* Empty State for All Tasks */}
+        {tasks.length === 0 && (
+          <div className="text-center py-16">
+            <div className="mx-auto w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-6">
+              <CheckCircle size={32} className="text-gray-400" />
+            </div>
+            <h3 className="text-xl font-semibold text-gray-900 mb-2">No tasks yet</h3>
+            <p className="text-gray-600 mb-6">Get started by creating your first task</p>
+            <Button onClick={() => navigate('/add-task')} variant="primary" icon={<Plus size={18} />}>
+              Create Your First Task
+            </Button>
+          </div>
+        )}
     </div>
   );
 };

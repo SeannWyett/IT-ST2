@@ -1,12 +1,13 @@
-import React, { use } from 'react';
-import { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import SidebarNav from './sidebar-nav';
 import TopNav from './topnav';
 import Footer from './footer';
 
 const Layout = ({ children }) => {
     const [isSidebarOpen, setIsSidebarOpen] = React.useState(false);
-    const [theme, setTheme] = React.useState('light');
+    const [theme, setTheme] = React.useState(() => {
+        return localStorage.getItem('theme') || 'light';
+    });
 
     useEffect(() => {
         if (theme === 'dark') {
@@ -20,14 +21,14 @@ const Layout = ({ children }) => {
   
     return (
     <div 
-        className={`flex h-screen overflow-hidden transition-colors ${theme === "dark" ? "bg-gray-900 text-white" : "bg-white text-black"}`}
+        className={`flex h-screen overflow-hidden transition-colors ${theme === "dark" ? "text-white" : "text-black"}`}
     >
         <SidebarNav isSidebarOpen={isSidebarOpen} setIsSidebarOpen={setIsSidebarOpen} />
         <div 
         className={`flex flex-col flex-1 transition-all duration-300 ease-in-out ${isSidebarOpen ? "ml-64" : ""}`}
         >
         <TopNav theme={theme} setTheme={setTheme} isSidebarOpen={isSidebarOpen} setIsSidebarOpen={setIsSidebarOpen} />
-        <main className="flex-1 p-6 overflow-auto">
+        <main className="flex-1 overflow-auto min-h-0">
           {children}
         </main>
         <Footer />
